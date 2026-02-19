@@ -36,11 +36,11 @@ jobs:
       - name: Build and push Docker image
         run: |
             # Build the Docker image
-            docker build -t ${{ vars.AZURE_CONTAINER_REGISTRY_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} -t ${{ vars.AZURE_CONTAINER_REGISTRY_NAME }}/${{ env.IMAGE_NAME }}:latest ./src
+            docker build -t ${{ vars.AZURE_CONTAINER_REGISTRY_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }} -t ${{ vars.AZURE_CONTAINER_REGISTRY_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest ./src
 
             # Push both tags to registry
-            docker push ${{ vars.AZURE_CONTAINER_REGISTRY_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-            docker push ${{ vars.AZURE_CONTAINER_REGISTRY_NAME }}/${{ env.IMAGE_NAME }}:latest
+            docker push ${{ vars.AZURE_CONTAINER_REGISTRY_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            docker push ${{ vars.AZURE_CONTAINER_REGISTRY_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
 
       - name: Deploy container to App Service
         uses: azure/webapps-deploy@v3
