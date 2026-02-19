@@ -122,10 +122,6 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
           // Deployment name is encoded in the URL for Azure.AI.Inference with Azure OpenAI-style endpoints
           value: '${aiFoundry.properties.endpoint}openai/deployments/phi-4'
         }
-        {
-          name: 'AzureAIFoundry__ApiKey'
-          value: aiFoundry.listKeys().key1
-        }
       ]
     }
   }
@@ -190,6 +186,7 @@ resource aiFoundry 'Microsoft.CognitiveServices/accounts@2025-09-01' = {
     publicNetworkAccess: 'Enabled'
     allowProjectManagement: true
     customSubDomainName: 'azais${resourceToken}'
+    disableLocalAuth: true        // Disables API key auth; Entra ID is the only supported method
   }
   identity: {
     type: 'SystemAssigned'
@@ -272,6 +269,20 @@ resource kvSecretsOfficerAssignment 'Microsoft.Authorization/roleAssignments@202
   scope: keyVault
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', kvSecretsOfficerRoleId)
+    principalId: uami.properties.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// ---------------------------------------------------------------------------
+// RBAC: Azure AI User for UAMI on AI Foundry (enables token-based auth, no API key)
+// ---------------------------------------------------------------------------
+var azureAiUserRoleId = '53ca6127-db72-4b80-b1b0-d745d6d5456d'
+resource aiFoundryUserAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(aiFoundry.id, uami.id, azureAiUserRoleId)
+  scope: aiFoundry
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', azureAiUserRoleId)
     principalId: uami.properties.principalId
     principalType: 'ServicePrincipal'
   }
