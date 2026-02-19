@@ -1,5 +1,5 @@
-using Azure;
 using Azure.AI.Inference;
+using Azure.Identity;
 
 namespace ZavaStorefront.Services;
 
@@ -15,12 +15,16 @@ public class ChatService
 
         _endpoint = configuration["AzureAIFoundry:Endpoint"]
             ?? throw new InvalidOperationException("AzureAIFoundry:Endpoint is not configured.");
-        var apiKey = configuration["AzureAIFoundry:ApiKey"]
-            ?? throw new InvalidOperationException("AzureAIFoundry:ApiKey is not configured.");
+
+        // DefaultAzureCredential uses managed identity (via AZURE_CLIENT_ID) on Azure
+        // and falls back to Azure CLI / developer credentials when running locally.
+        var clientId = configuration["AZURE_CLIENT_ID"];
+        var credential = new DefaultAzureCredential(
+            new DefaultAzureCredentialOptions { ManagedIdentityClientId = clientId });
 
         _client = new ChatCompletionsClient(
             new Uri(_endpoint),
-            new AzureKeyCredential(apiKey));
+            credential);
     }
 
     public async Task<string> SendMessageAsync(string userMessage)
