@@ -117,6 +117,15 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
           name: 'DOCKER_REGISTRY_SERVER_URL'
           value: 'https://${acr.properties.loginServer}'
         }
+        {
+          name: 'AzureAIFoundry__Endpoint'
+          // Deployment name is encoded in the URL for Azure.AI.Inference with Azure OpenAI-style endpoints
+          value: '${aiFoundry.properties.endpoint}openai/deployments/phi-4'
+        }
+        {
+          name: 'AzureAIFoundry__ApiKey'
+          value: aiFoundry.listKeys().key1
+        }
       ]
     }
   }
