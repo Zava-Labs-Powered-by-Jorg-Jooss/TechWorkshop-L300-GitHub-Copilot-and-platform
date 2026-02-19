@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/refs/heads/main/schemas/v1.0/azure.yaml.json
+
+name: zavastorefront
+metadata:
+  template: zavastorefront@0.0.1
+
+services:
+  storefront:
+    project: ./src
+    language: dotnet
+    host: appservice
+
+infra:
+  provider: bicep
+  path: infra
+  module: main
