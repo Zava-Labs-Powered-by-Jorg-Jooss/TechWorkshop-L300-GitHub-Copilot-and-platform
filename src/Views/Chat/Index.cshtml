@@ -1,0 +1,68 @@
+@{
+    ViewData["Title"] = "Chat";
+}
+
+<h2>Chat with Zava Assistant</h2>
+<p class="text-muted">Ask me anything about our products and pricing!</p>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <textarea id="chat-history" class="form-control mb-3" rows="14" readonly
+                    placeholder="Start a conversation..."></textarea>
+                <div class="input-group">
+                    <input type="text" id="chat-input" class="form-control"
+                        placeholder="Type your message and press Enter or click Send..." />
+                    <button class="btn btn-primary" id="send-btn" type="button">Send</button>
+                </div>
+                <div id="loading-indicator" class="mt-2 d-none text-muted">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    Thinking...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const history = document.getElementById('chat-history');
+    const input = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+    const loading = document.getElementById('loading-indicator');
+
+    async function sendMessage() {
+        const message = input.value.trim();
+        if (!message) return;
+
+        input.value = '';
+        sendBtn.disabled = true;
+        loading.classList.remove('d-none');
+        history.value += (history.value ? '\n' : '') + 'You: ' + message;
+
+        try {
+            const res = await fetch('/Chat/SendMessage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+            history.value += '\nAssistant: ' + data.reply;
+        } catch (err) {
+            history.value += '\n[Error] Failed to get a response. Please try again.';
+        } finally {
+            sendBtn.disabled = false;
+            loading.classList.add('d-none');
+            history.scrollTop = history.scrollHeight;
+            input.focus();
+        }
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    input.addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
+</script>
+}
